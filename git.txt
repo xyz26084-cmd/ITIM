@@ -1,0 +1,183 @@
+BASIC GIT & GITHUB CHEAT SHEET
+===============================
+
+1. INITIAL SETUP
+----------------
+git --version
+    Check Git version.
+
+git config --global user.name "Your Name"
+    Set your name.
+
+git config --global user.email "you@example.com"
+    Set your email.
+
+git config --list
+    View Git configuration.
+
+
+2. CREATE OR DOWNLOAD A REPOSITORY
+----------------------------------
+git init
+    Initialize a Git repository in the current directory.
+
+git clone REPOSITORY_URL
+    Download a repository from GitHub.
+
+git remote -v
+    Show connected remote repositories.
+
+git remote add origin REPOSITORY_URL
+    Connect the local repository to GitHub.
+
+
+3. BASIC GIT WORKFLOW
+---------------------
+git status
+    Check changed and untracked files.
+
+git add filename
+    Stage one file.
+
+git add .
+    Stage all changes in the current directory.
+
+git commit -m "First commit"
+    Save staged changes as a commit.
+
+git log
+    View commit history.
+
+git log --oneline
+    View short commit history.
+
+git diff
+    Show unstaged changes.
+
+
+4. PUSH CODE TO GITHUB
+----------------------
+git branch -M main
+    Rename the current branch to main.
+
+git remote add origin REPOSITORY_URL
+    Connect to the GitHub repository (do this once).
+
+git push -u origin main
+    Push the main branch and set its upstream.
+
+For later pushes:
+git push
+
+
+5. GET LATEST CODE
+------------------
+git pull
+    Fetch and merge changes from the connected branch.
+
+git fetch
+    Download remote updates without merging.
+
+git clone REPOSITORY_URL
+    Download a repository for the first time.
+
+
+6. BRANCHES
+-----------
+git branch
+    List local branches.
+
+git branch branch_name
+    Create a branch.
+
+git checkout branch_name
+    Switch to a branch.
+
+git switch branch_name
+    Switch to a branch.
+
+git switch -c branch_name
+    Create and switch to a new branch.
+
+git merge branch_name
+    Merge the specified branch into the current branch.
+
+git branch -d branch_name
+    Delete a local branch.
+
+
+7. UNDO / REMOVE CHANGES
+------------------------
+git restore filename
+    Discard unstaged changes in a file.
+
+git restore --staged filename
+    Unstage a file but keep its changes.
+
+git rm filename
+    Remove a tracked file and stage its deletion.
+
+git reset --soft HEAD~1
+    Undo the last commit but keep changes staged.
+
+git reset --hard HEAD~1
+    Undo the last commit and discard its changes.
+    WARNING: This can permanently discard work.
+
+
+8. GITHUB BASIC WORKFLOW
+------------------------
+1. Create a repository on GitHub.
+2. Open your project directory in the terminal.
+3. Run:
+
+git init
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin REPOSITORY_URL
+git push -u origin main
+
+For future updates:
+
+git add .
+git commit -m "Updated project"
+git push
+
+
+9. IMPORTANT TERMS
+------------------
+Repository   Project tracked by Git.
+Commit       Saved snapshot of changes.
+Branch       Separate line of development.
+Clone        Copy a remote repository locally.
+Push         Upload local commits to remote.
+Pull         Download and merge remote changes.
+Fetch        Download remote changes without merging.
+Merge        Combine changes from branches.
+Origin       Common name for the remote repository.
+Git          Version control tool.
+GitHub       Website/platform for hosting Git repositories.
+
+
+10. MOST IMPORTANT COMMANDS
+---------------------------
+git init
+git clone REPOSITORY_URL
+git status
+git add .
+git commit -m "message"
+git log --oneline
+git branch
+git switch -c branch_name
+git switch branch_name
+git merge branch_name
+git pull
+git push
+git remote -v
+
+NOTE:
+GitHub authentication may require a Personal Access Token or SSH key.
+GitHub account passwords are not accepted for normal Git HTTPS pushes.
+
+END OF CHEAT SHEET

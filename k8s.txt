@@ -1,0 +1,330 @@
+MINIKUBE + KUBERNETES CHEAT SHEET
+=================================
+
+Alias:
+
+echo 'alias kubectl="minikube kubectl --"' >> ~/.bashrc
+source ~/.bashrc
+
+1. START AND CHECK MINIKUBE
+---------------------------
+minikube start --driver=docker     Start the cluster using Docker
+minikube status                    Check Minikube status
+minikube stop                      Stop the cluster
+minikube pause                     Pause Kubernetes
+minikube unpause                   Resume Kubernetes
+minikube delete                     Delete the cluster
+minikube ip                        Show Minikube IP
+minikube dashboard                 Open Kubernetes Dashboard
+minikube addons list               List available addons
+minikube addons enable ingress     Enable Ingress addon
+minikube addons enable metrics-server
+                                   Enable metrics server
+minikube service SERVICE_NAME      Open a service in the browser
+minikube logs                      View Minikube logs
+
+2. KUBECTL BASIC COMMANDS
+-------------------------
+kubectl version --client           Show kubectl client version
+kubectl cluster-info               Show cluster information
+kubectl get nodes                  List cluster nodes
+kubectl get pods                   List pods in current namespace
+kubectl get pods -A                List pods in all namespaces
+kubectl get deployments            List deployments
+kubectl get services               List services
+kubectl get all                    List common resources
+kubectl get namespaces             List namespaces
+kubectl get events                 List cluster events
+kubectl get pods -o wide           Show pod IP and node
+kubectl get pods -o yaml           Show pod YAML
+
+3. POD COMMANDS
+---------------
+kubectl run nginx --image=nginx
+    Create a pod named nginx.
+
+kubectl get pods
+    List pods.
+
+kubectl describe pod POD_NAME
+    Show detailed pod information.
+
+kubectl logs POD_NAME
+    View pod logs.
+
+kubectl logs -f POD_NAME
+    Follow pod logs.
+
+kubectl exec -it POD_NAME -- sh
+    Open a shell inside a pod.
+
+kubectl delete pod POD_NAME
+    Delete a pod.
+
+4. DEPLOYMENT COMMANDS
+----------------------
+kubectl create deployment web --image=nginx
+    Create a deployment.
+
+kubectl get deployments
+    List deployments.
+
+kubectl describe deployment web
+    Show deployment details.
+
+kubectl get pods
+    List pods created by the deployment.
+
+kubectl scale deployment web --replicas=3
+    Scale deployment to three replicas.
+
+kubectl set image deployment/web nginx=nginx:1.27
+    Update the container image. "nginx" is the container name.
+
+kubectl rollout status deployment/web
+    Check rollout progress.
+
+kubectl rollout history deployment/web
+    Show rollout history.
+
+kubectl rollout undo deployment/web
+    Roll back the last rollout.
+
+kubectl delete deployment web
+    Delete deployment.
+
+5. SERVICE COMMANDS
+-------------------
+kubectl expose deployment web --type=NodePort --port=80
+    Create a NodePort service for the deployment.
+
+kubectl get services
+    List services.
+
+kubectl describe service web
+    Show service details.
+
+minikube service web
+    Open the service in a browser.
+
+kubectl delete service web
+    Delete service.
+
+SERVICE TYPES
+-------------
+ClusterIP       Internal access inside the cluster (default).
+NodePort        Exposes a port on each node.
+LoadBalancer    Uses an external load balancer. In Minikube, use
+                "minikube tunnel" in a separate terminal when required.
+
+6. DEPLOYMENT + SERVICE IN ONE YAML FILE
+----------------------------------------
+Create a file named web.yaml.
+
+The line with "---" separates the Deployment and Service resources.
+
+------------------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  type: NodePort
+  selector:
+    app: nginx
+  ports:
+    - port: 80
+      targetPort: 80
+------------------------------------------------------------
+
+7. APPLY AND CHECK THE YAML
+---------------------------
+kubectl apply -f web.yaml
+    Create or update the resources in the file.
+
+kubectl get deployments
+    Check the deployment.
+
+kubectl get pods -o wide
+    Check pods and their nodes.
+
+kubectl get services
+    Check the service.
+
+kubectl describe deployment nginx-deployment
+    Show deployment details.
+
+kubectl describe service nginx-service
+    Show service details.
+
+minikube service nginx-service
+    Open the Nginx service.
+
+kubectl delete -f web.yaml
+    Delete both resources defined in the file.
+
+8. YAML FIELD MEANINGS
+----------------------
+apiVersion       Kubernetes API version.
+kind             Resource type: Deployment, Service, Pod, etc.
+metadata         Resource name and labels.
+spec             Desired configuration.
+replicas         Number of pod copies.
+selector         Selects pods using labels.
+template         Pod template used by a Deployment.
+containers       Container definitions.
+name             Container name.
+image            Container image.
+containerPort    Port used by the container.
+type             Service type.
+port             Port exposed by the Service.
+targetPort       Port on the pod/container.
+nodePort         Optional fixed port on each node.
+labels           Key-value tags used to identify resources.
+
+IMPORTANT:
+The Service selector must match the labels on the Deployment's pods.
+In this example, both use: app: nginx
+
+9. NAMESPACE COMMANDS
+---------------------
+kubectl get namespaces
+    List namespaces.
+
+kubectl create namespace test
+    Create a namespace.
+
+kubectl get pods -n test
+    List pods in the test namespace.
+
+kubectl apply -f web.yaml -n test
+    Create resources in the test namespace.
+
+kubectl get all -n test
+    List common resources in the test namespace.
+
+kubectl delete namespace test
+    Delete the namespace and its resources.
+
+10. CONFIGURATION AND CONTEXT
+-----------------------------
+kubectl config get-contexts
+    List configured contexts.
+
+kubectl config current-context
+    Show current context.
+
+kubectl config use-context CONTEXT_NAME
+    Switch context.
+
+kubectl config view
+    Show Kubernetes configuration.
+
+11. TROUBLESHOOTING COMMANDS
+----------------------------
+kubectl describe pod POD_NAME
+    Check pod events and details.
+
+kubectl logs POD_NAME
+    Check container logs.
+
+kubectl get events --sort-by=.metadata.creationTimestamp
+    List events by time.
+
+kubectl get pods -o wide
+    Check pod status, IP and node.
+
+kubectl get endpoints nginx-service
+    Check service endpoints.
+
+kubectl describe service nginx-service
+    Check service selector and ports.
+
+kubectl get nodes -o wide
+    Check node details.
+
+minikube logs
+    Check Minikube logs.
+
+COMMON POD STATES
+-----------------
+Pending              Waiting to be scheduled or for required resources.
+ContainerCreating    Container is being created.
+Running              Pod is running.
+CrashLoopBackOff     Container repeatedly starts and crashes.
+ImagePullBackOff     Kubernetes cannot pull the container image.
+Completed            Container finished successfully.
+
+12. USEFUL RESOURCE COMMANDS
+----------------------------
+kubectl delete pod POD_NAME
+kubectl delete deployment DEPLOYMENT_NAME
+kubectl delete service SERVICE_NAME
+kubectl delete -f FILE.yaml
+kubectl apply -f FILE.yaml
+kubectl edit deployment DEPLOYMENT_NAME
+kubectl describe deployment DEPLOYMENT_NAME
+kubectl get pods,services,deployments
+
+13. QUICK PRACTICE WORKFLOW
+---------------------------
+Start Minikube:
+minikube start --driver=docker
+
+Check the cluster:
+kubectl get nodes
+
+Create web.yaml using the Deployment + Service example above.
+
+Apply it:
+kubectl apply -f web.yaml
+
+Check resources:
+kubectl get deployments
+kubectl get pods -o wide
+kubectl get services
+
+Open the application:
+minikube service nginx-service
+
+Scale to five pods:
+kubectl scale deployment nginx-deployment --replicas=5
+
+Check the pods:
+kubectl get pods
+
+Delete the resources:
+kubectl delete -f web.yaml
+
+Stop Minikube:
+minikube stop
+
+14. IMPORTANT CONCEPTS
+----------------------
+Pod          Smallest deployable Kubernetes unit; runs one or more containers.
+Deployment   Manages pods and maintains the desired number of replicas.
+Service      Provides a stable network endpoint for a group of pods.
+Node         A machine in the Kubernetes cluster.
+Namespace    Separates resources within a cluster.
+Minikube     Runs a local Kubernetes cluster for learning and development.
+kubectl      Command-line tool used to communicate with Kubernetes

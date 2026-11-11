@@ -1,0 +1,204 @@
+
+BASIC ANSIBLE CHEAT SHEET
+=========================
+
+1. CHECK ANSIBLE
+---------------
+ansible --version
+ansible --help
+ansible-config dump
+
+
+2. INVENTORY
+------------
+Create a file named inventory:
+
+[web]
+192.168.1.10
+192.168.1.11
+
+[db]
+192.168.1.20
+
+[all:vars]
+ansible_user=ubuntu
+ansible_ssh_private_key_file=~/.ssh/id_rsa
+
+List hosts:
+ansible all --list-hosts
+
+Test connection:
+ansible all -i inventory -m ping
+
+
+3. AD-HOC COMMANDS
+------------------
+ansible all -i inventory -m ping
+ansible all -i inventory -m command -a "uptime"
+ansible all -i inventory -m command -a "hostname"
+ansible web -i inventory -m command -a "date"
+ansible all -i inventory -m shell -a "df -h"
+ansible all -i inventory -m command -a "whoami"
+
+Run with sudo:
+ansible all -i inventory -m command -a "whoami" --become
+
+Run on one host:
+ansible 192.168.1.10 -i inventory -m ping
+
+
+4. COMMON MODULES
+-----------------
+ping       Test Ansible connectivity.
+command    Run a command on the remote host.
+shell      Run a shell command on the remote host.
+copy       Copy a file to remote hosts.
+file       Create, delete or change file permissions.
+apt        Manage packages on Debian/Ubuntu.
+dnf        Manage packages on RHEL/Fedora.
+service    Manage services.
+user       Manage users.
+setup      Gather system information.
+
+Examples:
+
+ansible all -i inventory -m command -a "uptime"
+
+Copy a file:
+ansible all -i inventory -m copy -a "src=hello.txt dest=/tmp/hello.txt"
+
+Create a directory:
+ansible all -i inventory -m file -a "path=/tmp/testdir state=directory"
+
+Delete a file:
+ansible all -i inventory -m file -a "path=/tmp/hello.txt state=absent"
+
+Install a package on Ubuntu:
+ansible all -i inventory -m apt -a "name=nginx state=present" --become
+
+Install a package on RHEL:
+ansible all -i inventory -m dnf -a "name=httpd state=present" --become
+
+Start a service:
+ansible all -i inventory -m service -a "name=nginx state=started" --become
+
+Enable a service:
+ansible all -i inventory -m service -a "name=nginx enabled=yes" --become
+
+
+5. PLAYBOOK
+-----------
+Create a file named playbook.yml:
+
+---
+- name: Install and start Nginx
+  hosts: web
+  become: yes
+
+  tasks:
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Start Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+Run the playbook:
+ansible-playbook -i inventory playbook.yml
+
+Check syntax:
+ansible-playbook -i inventory playbook.yml --syntax-check
+
+Show planned changes:
+ansible-playbook -i inventory playbook.yml --check
+
+Run for a specific group:
+ansible-playbook -i inventory playbook.yml --limit web
+
+
+6. PLAYBOOK BASIC KEYWORDS
+--------------------------
+name       Description of a play or task.
+hosts      Target hosts or inventory group.
+tasks      List of tasks to execute.
+become     Run tasks with privilege escalation.
+vars       Define variables.
+gather_facts Collect information about remote hosts.
+when       Run a task only when a condition is true.
+loop       Repeat a task for multiple items.
+handlers   Tasks triggered by notifications.
+
+
+7. VARIABLES
+------------
+Example playbook:
+
+---
+- name: Use a variable
+  hosts: web
+  vars:
+    package_name: nginx
+
+  tasks:
+    - name: Install package
+      apt:
+        name: "{{ package_name }}"
+        state: present
+      become: yes
+
+
+8. HANDLERS
+-----------
+Handlers run when notified by a task.
+
+---
+- name: Configure Nginx
+  hosts: web
+  become: yes
+
+  tasks:
+    - name: Copy Nginx configuration
+      copy:
+        src: nginx.conf
+        dest: /etc/nginx/nginx.conf
+      notify: Restart Nginx
+
+  handlers:
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted
+
+
+9. USEFUL OPTIONS
+-----------------
+-i inventory       Specify inventory file.
+-m ping            Select a module.
+-a "command"       Pass module arguments.
+-u username        Connect using a specific SSH user.
+-k                 Ask for SSH password.
+-K                 Ask for become password.
+-b                 Use privilege escalation (sudo).
+-v                 Verbose output.
+--limit web        Target only the web group.
+--check            Check mode; preview supported changes.
+--syntax-check     Check playbook syntax.
+
+
+10. QUICK COMMANDS TO REMEMBER
+------------------------------
+ansible --version
+ansible all -i inventory -m ping
+ansible all -i inventory -m command -a "uptime"
+ansible all -i inventory -m setup
+ansible-playbook -i inventory playbook.yml
+ansible-playbook -i inventory playbook.yml --syntax-check
+ansible-playbook -i inventory playbook.yml --check
+ansible-inventory -i inventory --list
+
+END OF CHEAT SHEET
