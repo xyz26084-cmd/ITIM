@@ -1,0 +1,264 @@
+
+DOCKER COMMANDS CHEAT SHEET
+==========================
+
+1. BASIC COMMANDS
+----------------
+docker --version                 Check Docker version
+docker info                      Show Docker information
+docker help                      Show Docker help
+docker ps                        Show running containers
+docker ps -a                     Show all containers
+docker images                    List downloaded images
+docker pull nginx                Download an image
+docker login                     Login to Docker Hub
+docker logout                    Logout from Docker Hub
+
+2. CONTAINER MANAGEMENT
+-----------------------
+docker run nginx                 Create and start a container
+docker run -d nginx              Run container in background
+docker run -it ubuntu bash       Run interactive Ubuntu container
+docker run -d -p 8080:80 nginx   Map host port 8080 to container port 80
+docker run --name web nginx      Assign a name to a container
+docker start container_name      Start a stopped container
+docker stop container_name       Stop a container
+docker restart container_name    Restart a container
+docker pause container_name      Pause a container
+docker unpause container_name    Resume a container
+docker rm container_name         Remove a container
+docker rm -f container_name      Force remove a container
+docker rename old new            Rename a container
+
+3. CONTAINER INSPECTION
+----------------------
+docker logs container_name       View container logs
+docker logs -f container_name    Follow live logs
+docker inspect container_name    Show detailed container information
+docker stats                     Show live resource usage
+docker top container_name        Show processes inside a container
+docker port container_name       Show port mappings
+docker exec -it name bash        Open a shell inside a running container
+docker exec name ls              Run a command inside a container
+docker diff container_name       Show filesystem changes
+
+NOTE: Some minimal images do not include bash. Use sh instead.
+
+4. IMAGE MANAGEMENT
+-------------------
+docker images                    List images
+docker pull nginx                Download an image
+docker build -t myapp .          Build an image from the current directory
+docker rmi image_name            Remove an image
+docker rmi -f image_name         Force remove an image
+docker tag myapp user/myapp:v1   Tag an image
+docker history image_name        Show image layers
+docker inspect image_name        Inspect an image
+docker save -o image.tar myapp   Save an image to a tar file
+docker load -i image.tar         Load an image from a tar file
+
+5. DOCKERFILE INSTRUCTIONS
+--------------------------
+FROM        Specify the base image
+RUN         Execute commands while building the image
+CMD         Default command when the container starts
+ENTRYPOINT  Main executable for the container
+COPY        Copy files into the image
+ADD         Copy files or extract archives
+WORKDIR     Set the working directory
+EXPOSE      Document the container port
+ENV         Set environment variables
+ARG         Define build-time variables
+USER        Set the container user
+VOLUME      Define a mount point
+
+Example Dockerfile:
+-------------------
+FROM nginx
+WORKDIR /usr/share/nginx/html
+COPY index.html .
+EXPOSE 80
+
+Build and run:
+--------------
+docker build -t myweb .
+docker run -d -p 8080:80 myweb
+
+6. VOLUMES
+----------
+docker volume ls                List volumes
+docker volume create myvol      Create a volume
+docker volume inspect myvol     Inspect a volume
+docker volume rm myvol          Remove a volume
+docker volume prune             Remove unused volumes
+
+Mount a named volume:
+docker run -d -v myvol:/data nginx
+
+Bind mount a host directory:
+docker run -d -v /home/user/data:/data nginx
+
+7. NETWORKING
+-------------
+docker network ls                         List networks
+docker network create mynet               Create a network
+docker network inspect mynet              Inspect a network
+docker network rm mynet                   Remove a network
+docker network connect mynet container   Connect a container to a network
+docker network disconnect mynet container
+                                          Disconnect a container from a network
+
+Run a container on a specific network:
+docker run -d --name web --network mynet nginx
+
+Common network types:
+bridge    Default bridge network
+host      Container shares host networking
+none      No network connectivity
+overlay   Connect services across Docker hosts
+
+8. DOCKER COMPOSE
+-----------------
+docker compose up              Start services
+docker compose up -d           Start services in background
+docker compose down            Stop and remove services
+docker compose ps              List services
+docker compose logs            View service logs
+docker compose logs -f         Follow live logs
+docker compose build            Build services
+docker compose pull             Pull service images
+docker compose restart          Restart services
+docker compose stop             Stop services
+docker compose start            Start stopped services
+docker compose exec web sh      Open a shell in the web service
+
+9. CLEANUP COMMANDS
+-------------------
+docker container prune         Remove stopped containers
+docker image prune             Remove unused images
+docker volume prune            Remove unused volumes
+docker network prune           Remove unused networks
+docker system prune            Remove unused Docker data
+docker system prune -a         Remove all unused images too
+docker system df               Show Docker disk usage
+
+
+10. DOCKER HUB / REGISTRY
+-------------------------
+docker login                   Login to Docker Hub
+docker pull nginx              Download an image
+docker push user/myapp:v1      Upload an image
+docker search nginx            Search Docker Hub
+docker tag myapp user/myapp:v1 Tag an image
+
+Example push workflow:
+----------------------
+docker build -t myapp .
+docker tag myapp username/myapp:v1
+docker login
+docker push username/myapp:v1
+
+11. PRACTICAL WORKFLOWS
+-----------------------
+
+A. Run an Nginx web server:
+---------------------------
+docker pull nginx
+docker run -d --name web -p 8080:80 nginx
+docker ps
+
+Open in a browser: http://localhost:8080
+
+B. Create and manage an Ubuntu container:
+-----------------------------------------
+docker run -it --name test ubuntu bash
+
+Inside the container:
+apt update
+apt install curl -y
+exit
+
+Back on the host:
+docker start test
+docker exec -it test bash
+docker stop test
+docker rm test
+
+C. Build a simple Nginx image:
+------------------------------
+Create a directory and enter it:
+mkdir myapp
+cd myapp
+
+Create a file named Dockerfile:
+FROM nginx
+COPY index.html /usr/share/nginx/html/
+EXPOSE 80
+
+Build and run:
+docker build -t myapp .
+docker run -d -p 8080:80 myapp
+
+
+--------------------------------
+
+DOCKER SWARM:
+
+docker swarm init                    Initialize cluster
+docker swarm join                    Join cluster
+docker swarm join-token worker       Get worker join command
+docker node ls                       List nodes
+docker node ps NODE                  Show node tasks
+docker service create                Create service
+docker service ls                    List services
+docker service ps SERVICE            Show service tasks
+docker service scale SERVICE=COUNT   Scale service
+docker service update                Update service
+docker service rollback SERVICE      Roll back service
+docker stack deploy                  Deploy a stack
+docker stack ls                      List stacks
+docker stack rm STACK                Remove a stack
+docker network create -d overlay     Create overlay network
+
+
+
+---------------------------------
+docker-compose.yaml:
+
+services:
+
+  web:
+    build: .
+    container_name: myweb
+    ports:
+      - "8080:80"
+    volumes:
+      - ./html:/usr/share/nginx/html
+    environment:
+      - APP_ENV=production
+    restart: always
+    networks:
+      - mynetwork
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8
+    container_name: mydb
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin123
+    volumes:
+      - dbdata:/var/lib/mysql
+    restart: always
+    networks:
+      - mynetwork
+
+volumes:
+  dbdata:
+
+networks:
+  mynetwork:
+    driver: bridge
